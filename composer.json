@@ -1,0 +1,21 @@
+{
+  "name": "Digitick/Collection",
+  "description": "Collection tools for developpers",
+  "minimum-stability": "dev",
+  "license": "Apache 2",
+  "authors": [
+    {
+      "name": "Nicolas Natalini",
+      "email": "nicolas.natalini@digitick.com"
+    }
+  ],
+  "autoload": {
+    "psr-4" : { "": "src/" }
+  },
+  "require" : {
+    "php": ">=5.4"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "4.8.24"
+  }
+}
