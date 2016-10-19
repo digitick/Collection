@@ -7,13 +7,9 @@ namespace Digitick\Foundation\Collection;
  *
  */
 use Digitick\Foundation\Collection\InterfaceList;
-use Digitick\Foundation\Collection\TraitTypedCollection;
 
 abstract class AbstractList extends \SplFixedArray implements InterfaceList
 {
-    use TraitTypedCollection {
-        indexOf as traitIndexOf;
-    }
 
     /**
      * AbstractList constructor.
@@ -25,66 +21,8 @@ abstract class AbstractList extends \SplFixedArray implements InterfaceList
     }
 
     /**
-     * offsetSet override.
-     * @param $index
-     * @param $newval
-     */
-    public function offsetSet( $index, $newval)
-    {
-        static::checkElementType($newval);
-        try {
-            parent::offsetSet($index, $newval);
-        } catch (\RuntimeException $exc) {
-            $msg = sprintf ("Code : %s<br/>\nMessage : %s<br/>\nSize : %d<br/>\nIndex : %d<br/>\n",
-                $exc->getCode(),
-                $exc->getMessage(),
-                $this->getSize(),
-                $index
-            );
-            throw $exc;
-        }
-    }
-
-    /**
-     * fromArray override.
-     * @param $array
-     * @param $saves_indexes
-     */
-    public static function fromArray($array, $saves_indexes=true)
-    {
-        $total=count($array);
-        for($i=0;$i<$total;$i++)
-        {
-            static::checkElementType($array[$i]);
-        }
-        $collection = new static($total);
-        $parentCollection = parent::fromArray($array, $saves_indexes);
-
-        for($i=0;$i<$total;$i++)
-        {
-            $collection[$i]=$parentCollection[$i];
-        }
-        return $collection;
-    }
-
-    /**
-     * clear empties current list.
-     *
-     */
-    public function clear()
-    {
-        $size=$this->size();
-        for($i=0;$i<$size;$i++)
-        {
-            $this->remove($i);
-        }
-        return TRUE;
-    }
-
-    /**
-     * fromArray override.
-     * @param $array
-     * @param $saves_indexes
+     * addAll : add every element from the given collection.
+     * @param InterfaceCollection $elementCollection
      */
     public function addAll(InterfaceCollection $elementCollection)
     {
@@ -99,35 +37,101 @@ abstract class AbstractList extends \SplFixedArray implements InterfaceList
 
     }
 
+    /**
+     * add : add given element at the offset position.
+     * @param offset
+     * @param mixed $element
+     */
     public function add($offset, $element)
     {
         return $this->set($offset, $element);
     }
 
-
-    public function set($offset, $element)
+    /**
+     * clear : empty current list.
+     *
+     */
+    public function clear()
     {
-        return $this->offsetSet($offset, $element);
+        $size=$this->size();
+        for($i=0;$i<$size;$i++)
+        {
+            $this->remove($i);
+        }
+        return TRUE;
     }
 
-    public function get($offset)
-    {
-        return $this->offsetGet($offset);
-    }
-
-
-    public function remove($offset)
-    {
-        return $this->offsetUnset($offset);
-    }
-
-
+    /**
+     * contains : check whether the given element is on the list.
+     * @param $element
+     */
     public function contains($element)
     {
         return ($this->indexOf($element)!==-1);
     }
 
 
+    /**
+     * contains : check whether every element in the given elementCollection is on the list.
+     * @param $elementCollection
+     */
+    public function containsAll(InterfaceCollection $elementCollection)
+    {
+        $otherCollectionSize=$elementCollection->size();
+        $i=0;
+        $found=true;
+        while($i<$otherCollectionSize and $found)
+        {
+            $found = ($this->indexOf($elementCollection[$i]) !== -1);
+            $i++;
+        }
+
+        return ($found);
+
+    }
+
+    /**
+     * get : return the element matching the given offset.
+     * @param $element
+     */
+    public function get($offset)
+    {
+        return $this->offsetGet($offset);
+    }
+
+
+    protected function compare($element1, $element2)
+    {
+        if (is_object($element1) and is_object($element2))
+            return ($element1 == $element2);
+        if (!is_object($element1) and !is_object($element2))
+            return ($element1 === $element2);
+        return false;
+    }
+
+
+    public function indexOf($element)
+    {
+        $size=$this->size();
+        $found=false;
+        $i=0;
+
+        while(!$found and $i<$size)
+        {
+            $found=$this->compare($element, $this->get($i));
+            $i++;
+        }
+        if ($found)
+            return $i-1;
+        else
+            return -1;
+    }
+
+
+    /**
+     * isEmpty : check whether the list is empty or not.
+     *
+     */
     public function isEmpty()
     {
         $isEmpty = true;
@@ -144,31 +148,44 @@ abstract class AbstractList extends \SplFixedArray implements InterfaceList
         return ($isEmpty);
     }
 
-    public function size()
+
+    /**
+     * remove : remove from current list the element matching the given offset.
+     *
+     */
+    public function remove($offset)
     {
-        return $this->count();
+        return $this->offsetUnset($offset);
     }
 
-    public function toArray()
-    {
-        $array = array();
-        $size=$this->size();
 
-        for($i=0;$i<$size;$i++)
-        {
-            $array[$i] = $this->get($i);
-        }
-        return $array;
-    }
-
-    public function containsAll(InterfaceCollection $elementCollection)
-    {
-
-    }
-
+    /**
+     * removeAll : remove from current list every element within the elementCollection.
+     *
+     */
     public function removeAll(InterfaceCollection $elementCollection)
     {
 
+    }
+
+    /**
+     * set : set the given element in the list at the offset position. (same as add())
+     * @param offset
+     * @param mixed $element
+     */
+    public function set($offset, $element)
+    {
+        return $this->offsetSet($offset, $element);
+    }
+
+
+    /**
+     * size : get current list size
+     *
+     */
+    public function size()
+    {
+        return $this->count();
     }
 
     public function subList($fromIndex, $toIndex)
@@ -187,8 +204,19 @@ abstract class AbstractList extends \SplFixedArray implements InterfaceList
         return $subList;
     }
 
-    public function indexOf($element)
+
+    public function toArray()
     {
-        return $this->traitIndexOf($element);
+        $array = array();
+        $size=$this->size();
+
+        for($i=0;$i<$size;$i++)
+        {
+            $array[$i] = $this->get($i);
+        }
+        return $array;
     }
+
+
+
 }

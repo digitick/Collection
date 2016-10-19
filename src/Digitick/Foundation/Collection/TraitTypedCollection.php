@@ -37,6 +37,15 @@ Trait TraitTypedCollection
 
     }
 
+    protected function compare($element1, $element2)
+    {
+        if (is_object($element1) and is_object($element2))
+            return ($element1 == $element2);
+        if (!is_object($element1) and !is_object($element2))
+            return ($element1 === $element2);
+        return false;
+    }
+
 
     protected function indexOf($element)
     {
@@ -46,14 +55,14 @@ Trait TraitTypedCollection
 
         while(!$found and $i<$size)
         {
-            $found=($element == $this->offsetGet($i));
+            $found=$this->compare($element, $this->get($i));
             $i++;
         }
-
         if ($found)
             return $i-1;
         else
             return -1;
     }
+
 
 }

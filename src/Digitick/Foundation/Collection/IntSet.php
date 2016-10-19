@@ -3,7 +3,7 @@
 namespace Digitick\Foundation\Collection;
 
 
-class IntList extends AbstractTypedList
+class IntSet extends AbstractSet
 {
     protected static $CLASSORTYPENAME='integer';
 }

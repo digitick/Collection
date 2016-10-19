@@ -9,57 +9,20 @@ namespace Digitick\Foundation\Collection;
 use Digitick\Foundation\Collection\InterfaceSet;
 use Digitick\Foundation\Collection\TraitTypedCollection;
 
-abstract class AbstractSet extends \SplFixedArray implements InterfaceSet
+abstract class AbstractSet implements InterfaceSet
 {
     use TraitTypedCollection;
-    const DEFAULT_SIZE = 5;
+    const DEFAULT_SIZE = 500;
     protected $nextAvailableOffset=0;
+    protected $storageArray;            // utilisé pour stocker les données réellement
+
 
     public function __construct()
     {
-        parent::__construct(static::DEFAULT_SIZE);
+        $this->storageArray = new \SplFixedArray(static::DEFAULT_SIZE);
         $this->nextAvailableOffset=0;
     }
 
-    protected function increaseSize($quantity=1)
-    {
-        $this->nextAvailableOffset = $this->nextAvailableOffset + $quantity;
-        $currentSize=$this->getSize();
-        if ($this->nextAvailableOffset >= $currentSize)
-        {
-            $this->setSize($currentSize + static::DEFAULT_SIZE);
-        }
-    }
-
-    protected function decreaseSize($quantity=1)
-    {
-        if ($quantity > $this->nextAvailableOffset)
-            throw new \InvalidArgumentException('Cannot decrease current set with value (='.$quantity.') greater than its size (='.$this->nextAvailableOffset.')');
-        $this->nextAvailableOffset = $this->nextAvailableOffset - $quantity;
-
-        //  Doit-on aussi redimensionner à la baisse pour économiser de la mémoire mais perdre de la perf à le faire ?    
-    }
-
-    /**
-     * offsetSet override.
-     * @param $index
-     * @param $newval
-     */
-    public function offsetSet( $index, $newval)
-    {
-        static::checkElementType($newval);
-        try {
-            parent::offsetSet($index, $newval);
-        } catch (\RuntimeException $exc) {
-            $msg = sprintf ("Code : %s<br/>\nMessage : %s<br/>\nSize : %d<br/>\nIndex : %d<br/>\n",
-                $exc->getCode(),
-                $exc->getMessage(),
-                $this->getSize(),
-                $index
-            );
-            throw $exc;
-        }
-    }
 
     /**
      * fromArray override.
@@ -92,9 +55,9 @@ abstract class AbstractSet extends \SplFixedArray implements InterfaceSet
         $this->nextAvailableOffset = 0;
 
         $size=$this->size();
-        for($i=0;$i<$size;$i++)
+        for($i=$size-1;$i>=0;$i--)
         {
-            $this->remove($i);
+            $this->removeOffset($i);
         }
         return TRUE;
     }
@@ -110,7 +73,7 @@ abstract class AbstractSet extends \SplFixedArray implements InterfaceSet
         $currentSize=$this->size();
         $addedSize=$elementCollection->size();
         $newSize=$currentSize+$addedSize;
-        $this->setSize($newSize);
+        $this->storageArray->setSize($newSize);
         for($i=$currentSize;$i<$newSize;$i++)
         {
             $this->add($elementCollection[$i-$currentSize]);
@@ -122,7 +85,7 @@ abstract class AbstractSet extends \SplFixedArray implements InterfaceSet
     {
         if ($this->indexOf($element) === -1)
         {
-            $this->offsetSet($this->nextAvailableOffset, $element);
+            $this->set($this->nextAvailableOffset, $element);
             $this->increaseSize();
             return true;
         }
@@ -136,26 +99,13 @@ abstract class AbstractSet extends \SplFixedArray implements InterfaceSet
         $offset = $this->indexOf($element);
         if ($offset != -1) // A remplacer par une constante NOT_FOUND
         {
-//            $this->offsetUnset($offset);
-            $this->shift($offset);
-            $this->decreaseSize();
+            $this->removeOffset($offset);
             return true;
         }
         else
             return false;
     }
 
-
-    protected function shift($fromOffset)
-    {
-        if ($fromOffset > $this->nextAvailableOffset)
-            throw new \InvalidArgumentException('Cannot decrease current set with value (='.$fromOffset.') greater than its size (='.$this->nextAvailableOffset.')');
-        for($i=$fromOffset;$i<$this->nextAvailableOffset;$i++)
-        {
-            var_dump($this->offsetGet($i+1));
-            $this->offsetSet($i, $this->offsetGet($i+1));
-        }
-    }
 
     public function contains($element)
     {
@@ -199,4 +149,82 @@ abstract class AbstractSet extends \SplFixedArray implements InterfaceSet
     }
 
 
+    public function current()
+    {
+        return $this->storageArray->current();
+    }
+
+    public function key()
+    {
+        return $this->storageArray->key();
+    }
+
+    public function next()
+    {
+        return $this->storageArray->next();
+    }
+
+    public function rewind()
+    {
+        return $this->storageArray->rewind();
+    }
+
+    public function valid()
+    {
+        return $this->storageArray->valid();
+    }
+
+    public function count()
+    {
+        return $this->storageArray->count();
+    }
+
+
+    protected function get($offset)
+    {
+        return $this->storageArray->offsetGet($offset);
+    }
+
+    protected function set($offset, $element)
+    {
+        static::checkElementType($element);
+
+        $this->storageArray->offsetSet($offset, $element);
+    }
+
+    protected function increaseSize($quantity=1)
+    {
+        $this->nextAvailableOffset = $this->nextAvailableOffset + $quantity;
+        $currentSize=$this->storageArray->getSize();
+        if ($this->nextAvailableOffset >= $currentSize)
+        {
+            $this->storageArray->setSize($currentSize + static::DEFAULT_SIZE);
+        }
+    }
+
+    protected function decreaseSize($quantity=1)
+    {
+        if ($quantity > $this->nextAvailableOffset)
+            throw new \InvalidArgumentException('Cannot decrease current set with value (='.$quantity.') greater than its size (='.$this->nextAvailableOffset.')');
+        $this->nextAvailableOffset = $this->nextAvailableOffset - $quantity;
+
+        //  Doit-on aussi redimensionner à la baisse pour économiser de la mémoire mais perdre de la perf à le faire ?
+    }
+
+    protected function shift($fromOffset)
+    {
+        if ($fromOffset > $this->nextAvailableOffset)
+            throw new \InvalidArgumentException('Cannot decrease current set with value (='.$fromOffset.') greater than its size (='.$this->nextAvailableOffset.')');
+        for($i=$fromOffset;$i<$this->nextAvailableOffset;$i++)
+        {
+            $this->set($i, $this->get($i+1));
+        }
+    }
+
+
+    protected function removeOffset($offset)
+    {
+        $this->shift($offset);
+        $this->decreaseSize();
+    }
 }

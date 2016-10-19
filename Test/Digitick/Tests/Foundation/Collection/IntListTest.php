@@ -6,6 +6,14 @@ use Digitick\Foundation\Collection\IntList;
 
 class IntListTest extends \PHPUnit_Framework_TestCase
 {
+    protected $list;
+    protected $emptyList;
+
+    protected function setUp()
+    {
+      $this->list = $this->generateList(5);
+      $this->emptyList = new IntList(5);
+    }
 
     protected function generateList($size)
     {
@@ -19,43 +27,36 @@ class IntListTest extends \PHPUnit_Framework_TestCase
         return $list;
     }
 
-    public function emptyData () {
-        $coll = $this->generateList(5);
-        return array (
-                      [new IntList(5), true],
-                      [$coll, false]
-
-                      );
-    }
-
-    /**
-    * @dataProvider emptyData
-    */
-    public function testEmpty ($coll, $result)
+    public function testAdd()
     {
-        $this->assertEquals($coll->isEmpty(), $result);
+        $this->emptyList->add(1,10);
+        $this->assertFalse($this->emptyList->isEmpty());
     }
 
 
-
-    public function containsData () {
-        $list = $this->generateList(5);
-        return array (
-                      [$list, 0, false],
-                      [$list, 2, true],
-                      [$list, 6, false],
-                      [$list, "text", false],
-                      [$list, true, false],
-                      );
-    }
-
-    /**
-    * @dataProvider containsData
-    */
-    public function testContains($list, $searched_element, $result)
+    public function testAddAll()
     {
-        $this->assertEquals($list->contains($searched_element), $result);
+        $this->emptyList->addAll($this->list);
+        $this->assertTrue($this->emptyList->containsAll($this->list));
+        $this->list->setSize(6);
+        $this->list->add(5,6);
+        $this->assertFalse($this->emptyList->containsAll($this->list));
+    }
 
+    public function testEmpty ()
+    {
+        $this->assertTrue($this->emptyList->isEmpty());
+        $this->assertFalse($this->list->isEmpty());
+    }
+
+    public function testContains()
+    {
+        $this->assertFalse($this->list->contains(0));
+        $this->assertTrue($this->list->contains(2));
+        $this->assertFalse($this->list->contains(6));
+        $this->assertFalse($this->list->contains("text"));
+        $this->assertFalse($this->list->contains((boolean) true));
+        $this->assertFalse($this->list->contains(-1));
     }
 
 }
