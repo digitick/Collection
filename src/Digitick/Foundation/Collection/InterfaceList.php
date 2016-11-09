@@ -17,6 +17,6 @@ interface InterfaceList extends InterfaceCollection, \ArrayAccess
     public function indexOf($element);
     public function subList($fromIndex, $toIndex);
 
-    public static function fromArray($array, $saves_indexes=true);
+ //   public static function fromArray($array, $saves_indexes=true);
 
 }

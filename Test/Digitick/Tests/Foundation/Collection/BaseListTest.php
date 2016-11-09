@@ -2,9 +2,9 @@
 
 namespace Digitick\Tests\Foundation\Collection;
 
-use Digitick\Foundation\Collection\IntList;
+use Digitick\Foundation\Collection\BaseList;
 
-class IntListTest extends \PHPUnit_Framework_TestCase
+class BaseListTest extends \PHPUnit_Framework_TestCase
 {
     protected $list;
     protected $emptyList;
@@ -12,12 +12,12 @@ class IntListTest extends \PHPUnit_Framework_TestCase
     protected function setUp()
     {
       $this->list = $this->generateList(5);
-      $this->emptyList = new IntList(5);
+      $this->emptyList = new BaseList(5);
     }
 
     protected function generateList($size)
     {
-        $list = new IntList($size);
+        $list = new BaseList($size);
 
         for ($i=0;$i<$size;$i++)
         {
@@ -27,17 +27,35 @@ class IntListTest extends \PHPUnit_Framework_TestCase
         return $list;
     }
 
-    public function testAdd()
+/*
+    public function contains($element);
+
+    public function containsAll(InterfaceCollection $elementCollection);
+
+    public function removeAll(InterfaceCollection $elementCollection);
+
+    public function toArray();
+
+    public function add($offset, $element);
+    public function remove($offset);
+
+    public function get($offset);
+    public function set($offset, $element);
+
+    public function indexOf($element);
+    public function subList($fromIndex, $toIndex);
+
+    public static function fromArray($array, $saves_indexes=true);
+
+
+*/
+
+    public function testListMustNotBeEmptyAfterAdd()
     {
         $this->emptyList->add(1,10);
         $this->assertFalse($this->emptyList->isEmpty());
     }
 
-
-    public function testContainsAll()
-    {
-        $this->assertTrue($this->list->containsAll($this->list));
-    }
 
     public function testAddAll()
     {
@@ -64,4 +82,25 @@ class IntListTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($this->list->contains(-1));
     }
 
+
+    public function testContainsAll()
+    {
+
+    }
+
+    public function testListMustBeEmptyAfterClear()
+    {
+        $this->assertFalse($this->list->isEmpty());
+        $this->list->clear();
+        $this->assertTrue($this->list->isEmpty());
+
+    }
+
+
+    public function testSize()
+    {
+        $size = 5;
+        $list = new BaseList($size);
+        $this->assertEquals($size, $list->size());
+    }
 }
