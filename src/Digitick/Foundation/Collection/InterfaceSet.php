@@ -11,6 +11,4 @@ interface InterfaceSet extends InterfaceCollection
     public function add($element);
     public function remove($element);
 
-    //public static function fromArray($array);
-
 }

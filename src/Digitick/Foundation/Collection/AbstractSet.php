@@ -148,7 +148,7 @@ abstract class AbstractSet implements InterfaceSet
 
     }
 
-
+    /* Iterator interface methods override */
     public function current()
     {
         return $this->storageArray->current();

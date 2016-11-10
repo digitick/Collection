@@ -19,7 +19,7 @@ Trait TraitTypedCollection
 
         if (is_object($element))
         {
-            if (!is_a($element, static::$CLASSORTYPENAME))
+            if (!($element instanceof static::$CLASSORTYPENAME))
             {
                 $type = get_class($element);
                 $isValid = FALSE;
