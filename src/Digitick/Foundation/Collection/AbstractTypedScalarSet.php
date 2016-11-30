@@ -4,10 +4,10 @@ namespace Digitick\Foundation\Collection;
 
 /**
  * This class is used to create a fixed list of objects
- * Class AbstractTypedList
+ * Class AbstractTypedScalarSet
  * @package Digitick\Foundation\Collection
  */
-abstract class AbstractTypedList extends AbstractList
+abstract class AbstractTypedScalarSet extends AbstractScalarSet
 {
     /**
      * fromArray override
@@ -33,17 +33,6 @@ abstract class AbstractTypedList extends AbstractList
     }
 
     /**
-     * offsetSet override.
-     * @param $index
-     * @param $newval
-     */
-    public function offsetSet($index, $newval)
-    {
-        static::checkElementType($newval);
-        parent::offsetSet($index, $newval);
-    }
-
-    /**
      * Find the offset matching the given element
      *
      * @param $element
@@ -52,8 +41,19 @@ abstract class AbstractTypedList extends AbstractList
     public function indexOf($element)
     {
         static::checkElementType($element);
-        return $this->traitIndexOf($element, $this);
+        return parent::indexOf($element);
     }
-
+    
+    /**
+     * Add an element to list
+     *
+     * @param $element
+     * @return bool
+     */
+    public function add($element)
+    {
+        static::checkElementType($element);
+        parent::add($element);
+    }
 
 }

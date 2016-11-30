@@ -1,68 +1,75 @@
 <?php
 
 namespace Digitick\Foundation\Collection;
+
+
 /**
  * This trait is used to gather common code about typed collection management
- *
+ * Class TraitTypedCollection
+ * @package Digitick\Foundation\Collection
  */
-
 Trait TraitTypedCollection
 {
+    /**
+     * @var string
+     */
     protected static $CLASSORTYPENAME = 'unknown';
 
-    private static function checkElementType($element)
+    /**
+     * Check the element type
+     *
+     * @param $element
+     * @return bool
+     * @throws \InvalidArgumentException
+     */
+    protected static function checkElementType($element)
     {
         $type = 'unknown';
-        $isValid = TRUE;
+        $isValid = true;
         if (is_null($element))
             return true;
 
-        if (is_object($element))
-        {
-            if (!($element instanceof static::$CLASSORTYPENAME))
-            {
+        if (is_object($element)) {
+            if (!($element instanceof static::$CLASSORTYPENAME)) {
                 $type = get_class($element);
-                $isValid = FALSE;
+                $isValid = false;
             }
-        }
-        else
-        {
+        } else {
             $type = gettype($element);
-            if ( $type != static::$CLASSORTYPENAME)
-                $isValid = FALSE;
+            if ($type != static::$CLASSORTYPENAME)
+                $isValid = false;
         }
         if (!$isValid)
             throw new \InvalidArgumentException('Item of class or type "' . static::$CLASSORTYPENAME . '" expected. "' . $type . '" given.');
 
-
+        return $isValid;
     }
 
-    protected function compare($element1, $element2)
+    /**
+     * Return index of element in collection
+     *
+     * @param $element
+     * @param $collectionObject
+     * @return int
+     */
+    protected function indexOf($element, $collectionObject)
     {
-        if (is_object($element1) and is_object($element2))
-            return ($element1 == $element2);
-        if (!is_object($element1) and !is_object($element2))
-            return ($element1 === $element2);
-        return false;
-    }
-
-
-    protected function indexOf($element)
-    {
-        $size=$this->size();
-        $found=false;
-        $i=0;
-
-        while(!$found and $i<$size)
-        {
-            $found=$this->compare($element, $this->get($i));
-            $i++;
+        if($this->contains($element, $collectionObject)) {
+            return array_search($element, (array)$collectionObject, true);
         }
-        if ($found)
-            return $i-1;
-        else
-            return -1;
+
+        return -1;
     }
 
-
+    /**
+     * Check element existence in collection
+     *
+     * @param $element
+     * @param $collectionObject
+     * @return mixed
+     */
+    protected function contains($element, $collectionObject)
+    {
+        return in_array($element, (array)$collectionObject, true);
+    }
 }

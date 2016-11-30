@@ -9,30 +9,11 @@ class IntListTest extends \PHPUnit_Framework_TestCase
     protected $list;
     protected $emptyList;
 
-    protected function setUp()
-    {
-      $this->list = $this->generateList(5);
-      $this->emptyList = new IntList(5);
-    }
-
-    protected function generateList($size)
-    {
-        $list = new IntList($size);
-
-        for ($i=0;$i<$size;$i++)
-        {
-            $list->set($i, $i+1);
-        }
-
-        return $list;
-    }
-
     public function testAdd()
     {
-        $this->emptyList->add(1,10);
+        $this->emptyList->add(1, 10);
         $this->assertFalse($this->emptyList->isEmpty());
     }
-
 
     public function testContainsAll()
     {
@@ -44,11 +25,11 @@ class IntListTest extends \PHPUnit_Framework_TestCase
         $this->emptyList->addAll($this->list);
         $this->assertTrue($this->emptyList->containsAll($this->list));
         $this->list->setSize(6);
-        $this->list->add(5,6);
+        $this->list->add(5, 6);
         $this->assertFalse($this->emptyList->containsAll($this->list));
     }
 
-    public function testEmpty ()
+    public function testEmpty()
     {
         $this->assertTrue($this->emptyList->isEmpty());
         $this->assertFalse($this->list->isEmpty());
@@ -60,8 +41,25 @@ class IntListTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($this->list->contains(2));
         $this->assertFalse($this->list->contains(6));
         $this->assertFalse($this->list->contains("text"));
-        $this->assertFalse($this->list->contains((boolean) true));
+        $this->assertFalse($this->list->contains((boolean)true));
         $this->assertFalse($this->list->contains(-1));
+    }
+
+    protected function setUp()
+    {
+        $this->list = $this->generateList(5);
+        $this->emptyList = new IntList(5);
+    }
+
+    protected function generateList($size)
+    {
+        $list = new IntList($size);
+
+        for ($i = 0; $i < $size; $i++) {
+            $list->set($i, $i + 1);
+        }
+
+        return $list;
     }
 
 }

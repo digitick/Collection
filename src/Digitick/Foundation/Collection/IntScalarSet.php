@@ -4,10 +4,10 @@ namespace Digitick\Foundation\Collection;
 
 
 /**
- * Class IntList
+ * Class IntScalarSet
  * @package Digitick\Foundation\Collection
  */
-class IntList extends AbstractTypedList
+class IntScalarSet extends AbstractScalarSet
 {
     /**
      * @var string

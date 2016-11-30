@@ -4,13 +4,13 @@ namespace Digitick\Foundation\Collection;
 
 
 /**
- * Class IntList
+ * Class StringScalarSet
  * @package Digitick\Foundation\Collection
  */
-class IntList extends AbstractTypedList
+class StringScalarSet extends AbstractScalarSet
 {
     /**
      * @var string
      */
-    protected static $CLASSORTYPENAME = 'integer';
+    protected static $CLASSORTYPENAME = 'string';
 }

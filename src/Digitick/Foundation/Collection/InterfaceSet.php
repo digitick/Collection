@@ -3,12 +3,15 @@
 namespace Digitick\Foundation\Collection;
 
 
-use Digitick\Foundation\Collection\InterfaceCollection;
-
+/**
+ * Interface InterfaceSet
+ * @package Digitick\Foundation\Collection
+ */
 interface InterfaceSet extends InterfaceCollection
 {
 
     public function add($element);
+    public function get($element);
     public function remove($element);
 
 }

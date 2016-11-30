@@ -4,12 +4,15 @@ namespace Digitick\Foundation\Collection;
 
 /**
  * This class is used to create a fixed list of objects
- *
+ * Class AbstractList
+ * @package Digitick\Foundation\Collection
  */
-use Digitick\Foundation\Collection\InterfaceList;
-
 abstract class AbstractList extends \SplFixedArray implements InterfaceList
 {
+    use TraitTypedCollection {
+        indexOf as traitIndexOf;
+        contains as traitContains;
+    }
 
     /**
      * AbstractList constructor.
@@ -21,125 +24,127 @@ abstract class AbstractList extends \SplFixedArray implements InterfaceList
     }
 
     /**
-     * addAll : add every element from the given collection.
+     * Add every element from the given collection.
+     *
      * @param InterfaceCollection $elementCollection
      */
     public function addAll(InterfaceCollection $elementCollection)
     {
-        $currentSize=$this->size();
-        $addedSize=$elementCollection->size();
-        $newSize=$currentSize+$addedSize;
+        $currentSize = $this->size();
+        $addedSize = $elementCollection->size();
+        $newSize = $currentSize + $addedSize;
         $this->setSize($newSize);
-        for($i=$currentSize;$i<$newSize;$i++)
-        {
-            $this->add($i, $elementCollection[$i-$currentSize]);
+        for ($i = $currentSize; $i < $newSize; $i++) {
+            $this->add($i, $elementCollection[$i - $currentSize]);
         }
 
     }
 
     /**
-     * add : add given element at the offset position.
-     * @param offset
-     * @param mixed $element
+     * Get current list size
+     */
+    public function size()
+    {
+        return $this->count();
+    }
+
+    /**
+     * Add given element at the offset position.
+     *
+     * @param $offset
+     * @param $element
      */
     public function add($offset, $element)
     {
-        return $this->set($offset, $element);
+        $this->set($offset, $element);
     }
 
     /**
-     * clear : empty current list.
+     * Set the given element in the list at the offset position. (same as add())
      *
+     * @param offset
+     * @param mixed $element
+     */
+    public function set($offset, $element)
+    {
+        $this->offsetSet($offset, $element);
+    }
+
+    /**
+     * Empty current list.
+     *
+     * @return bool
      */
     public function clear()
     {
-        $size=$this->size();
-        for($i=0;$i<$size;$i++)
-        {
+        $size = $this->size();
+        for ($i = 0; $i < $size; $i++) {
             $this->remove($i);
         }
-        return TRUE;
+        return true;
     }
 
     /**
-     * contains : check whether the given element is on the list.
+     * Remove from current list the element matching the given offset.
+     */
+    public function remove($offset)
+    {
+        $this->offsetUnset($offset);
+    }
+
+    /**
+     * Check whether the given element is on the list.
+     *
      * @param $element
+     * @return bool
      */
     public function contains($element)
     {
-        return ($this->indexOf($element)!==-1);
+        return $this->traitContains($element, $this);
     }
 
+    /**
+     * Return the position of a given element if it exists
+     *
+     * @param $element
+     * @return int
+     */
+    public function indexOf($element)
+    {
+        return $this->traitIndexOf($element, $this);
+    }
 
     /**
-     * contains : check whether every element in the given elementCollection is on the list.
-     * @param $elementCollection
+     * Check whether every element in the given elementCollection is on the list.
+     *
+     * @param InterfaceCollection $elementCollection
+     * @return bool|int
      */
     public function containsAll(InterfaceCollection $elementCollection)
     {
-        $otherCollectionSize=$elementCollection->size();
-        $i=0;
-        $found=true;
-        while($i<$otherCollectionSize and $found)
-        {
-            $found = ($this->indexOf($elementCollection[$i]) !== -1);
+        $otherCollectionSize = $elementCollection->size();
+        $i = 0;
+        $found = true;
+        while ($i < $otherCollectionSize && $found) {
+            $found = ($this->contains($elementCollection[$i]));
             $i++;
         }
 
-        return ($found);
-
+        return $found;
     }
 
     /**
-     * get : return the element matching the given offset.
-     * @param $element
-     */
-    public function get($offset)
-    {
-        return $this->offsetGet($offset);
-    }
-
-
-    protected function compare($element1, $element2)
-    {
-        if (is_object($element1) and is_object($element2))
-            return ($element1 == $element2);
-        if (!is_object($element1) and !is_object($element2))
-            return ($element1 === $element2);
-        return false;
-    }
-
-
-    public function indexOf($element)
-    {
-        $size=$this->size();
-        $found=false;
-        $i=0;
-
-        while(!$found and $i<$size)
-        {
-            $found=$this->compare($element, $this->get($i));
-            $i++;
-        }
-        if ($found)
-            return $i-1;
-        else
-            return -1;
-    }
-
-
-    /**
-     * isEmpty : check whether the list is empty or not.
+     * Check whether the list is empty or not.
      *
+     * @return bool
      */
     public function isEmpty()
     {
         $isEmpty = true;
-        $i=0;
-        $size=$this->size();
+        $i = 0;
+        $size = $this->size();
 
-        while($isEmpty AND $i<$size)
-        {
+        while ($isEmpty && $i < $size) {
             if ($this->offsetExists($i))
                 $isEmpty = false;
             $i++;
@@ -148,20 +153,8 @@ abstract class AbstractList extends \SplFixedArray implements InterfaceList
         return ($isEmpty);
     }
 
-
     /**
-     * remove : remove from current list the element matching the given offset.
-     *
-     */
-    public function remove($offset)
-    {
-        return $this->offsetUnset($offset);
-    }
-
-
-    /**
-     * removeAll : remove from current list every element within the elementCollection.
-     *
+     * Remove from current list every element within the elementCollection.
      */
     public function removeAll(InterfaceCollection $elementCollection)
     {
@@ -169,54 +162,36 @@ abstract class AbstractList extends \SplFixedArray implements InterfaceList
     }
 
     /**
-     * set : set the given element in the list at the offset position. (same as add())
-     * @param offset
-     * @param mixed $element
-     */
-    public function set($offset, $element)
-    {
-        return $this->offsetSet($offset, $element);
-    }
-
-
-    /**
-     * size : get current list size
+     * Return a sublist of the current list from given indexes
      *
+     * @param $fromIndex
+     * @param $toIndex
+     * @return static
+     * @throws \InvalidArgumentException
      */
-    public function size()
-    {
-        return $this->count();
-    }
-
     public function subList($fromIndex, $toIndex)
     {
-        if ($fromIndex>$toIndex)
-            throw new \InvalidArgumentException('Parameter $fromIndex (='.$fromIndex.') cannot be greater than $toIndex (='.$toIndex.')');
+        if ($fromIndex > $toIndex)
+            throw new \InvalidArgumentException('Parameter $fromIndex (=' . $fromIndex . ') cannot be greater than $toIndex (=' . $toIndex . ')');
 
-        $subSize=$toIndex-$fromIndex+1;
+        $subSize = $toIndex - $fromIndex + 1;
         $subList = new static($subSize);
         $subIndex = 0;
-        for($i=$fromIndex;$i<=$toIndex;$i++)
-        {
+        for ($i = $fromIndex; $i <= $toIndex; $i++) {
             $subList->set($subIndex, $this->get($i));
             $subIndex++;
         }
         return $subList;
     }
 
-
-    public function toArray()
+    /**
+     * Return the element matching the given offset.
+     *
+     * @param $offset
+     * @return mixed
+     */
+    public function get($offset)
     {
-        $array = array();
-        $size=$this->size();
-
-        for($i=0;$i<$size;$i++)
-        {
-            $array[$i] = $this->get($i);
-        }
-        return $array;
+        return $this->offsetGet($offset);
     }
-
-
-
 }
