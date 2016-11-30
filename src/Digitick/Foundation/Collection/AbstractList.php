@@ -3,13 +3,13 @@
 namespace Digitick\Foundation\Collection;
 
 /**
- * This class is used to create a fixed list of objects
+ * This class is used to create a fixed list of elements
  * Class AbstractList
  * @package Digitick\Foundation\Collection
  */
 abstract class AbstractList extends \SplFixedArray implements InterfaceList
 {
-    use TraitTypedCollection {
+    use TraitCollection {
         indexOf as traitIndexOf;
         contains as traitContains;
     }

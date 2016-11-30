@@ -3,12 +3,14 @@
 namespace Digitick\Foundation\Collection;
 
 /**
- * This class is used to create a fixed list of objects
+ * This class is used to create a fixed list of scalars
  * Class AbstractTypedScalarSet
  * @package Digitick\Foundation\Collection
  */
 abstract class AbstractTypedScalarSet extends AbstractScalarSet
 {
+    use TraitTypedCollection;
+
     /**
      * fromArray override
      *

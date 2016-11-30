@@ -3,13 +3,13 @@
 namespace Digitick\Foundation\Collection;
 
 /**
- * This class is used to create a fixed list of objects
+ * This class is used to create a fixed list of scalars
  * Class AbstractScalarSet
  * @package Digitick\Foundation\Collection
  */
 abstract class AbstractScalarSet implements InterfaceSet
 {
-    use TraitTypedCollection {
+    use TraitCollection {
         indexOf as traitIndexOf;
         contains as traitContains;
     }

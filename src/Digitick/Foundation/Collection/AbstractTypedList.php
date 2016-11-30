@@ -9,6 +9,8 @@ namespace Digitick\Foundation\Collection;
  */
 abstract class AbstractTypedList extends AbstractList
 {
+    use TraitTypedCollection;
+    
     /**
      * fromArray override
      *
