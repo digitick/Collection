@@ -2,6 +2,8 @@
 
 namespace Digitick\Foundation\Collection;
 
+use Digitick\Foundation\Collection\Exception\UnexpectedTypeException;
+
 
 /**
  * This trait is used to gather common code about typed collection management
@@ -20,7 +22,7 @@ Trait TraitTypedCollection
      *
      * @param $element
      * @return bool
-     * @throws \InvalidArgumentException
+     * @throws UnexpectedTypeException
      */
     protected static function checkElementType($element)
     {
@@ -40,7 +42,7 @@ Trait TraitTypedCollection
                 $isValid = false;
         }
         if (!$isValid)
-            throw new \InvalidArgumentException('Item of class or type "' . static::$CLASSORTYPENAME . '" expected. "' . $type . '" given.');
+            throw new UnexpectedTypeException($type, static::$CLASSORTYPENAME);
 
         return $isValid;
     }

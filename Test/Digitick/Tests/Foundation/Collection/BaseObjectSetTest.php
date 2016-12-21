@@ -4,10 +4,12 @@ namespace Digitick\Tests\Foundation\Collection;
 
 use Digitick\Foundation\Collection\BaseObjectSet;
 
-class BaseScalarSetTest extends \PHPUnit_Framework_TestCase
+class BaseObjectSetTest extends \PHPUnit_Framework_TestCase
 {
-    protected $set;
+    /** @var  BaseObjectSet */
     protected $emptySet;
+    /** @var  BaseObjectSet */
+    protected $set;
 
     public function testListMustNotBeEmptyAfterAdd()
     {
@@ -41,6 +43,70 @@ class BaseScalarSetTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($this->set->contains($newObject));
     }
 
+    /**
+     * @expectedException \Digitick\Foundation\Collection\Exception\UnexpectedTypeException
+     */
+    public function testAddNonObject() {
+        $this->set->add(array ());
+    }
+
+    public function testAddExisting() {
+        $item = (object) ['foo' => 'bar'];
+        $res = $this->emptySet->add($item);
+        $this->assertTrue($res);
+
+        $res = $this->emptySet->add($item);
+        $this->assertFalse($res);
+    }
+
+    public function testRemove () {
+        $item = (object) ['foo' => 'bar'];
+        $res = $this->emptySet->add($item);
+        $this->assertTrue($this->emptySet->contains($item));
+
+        $this->emptySet->remove($item);
+        $this->assertFalse($this->emptySet->contains($item));
+    }
+
+    public function testToArray () {
+        $set = new BaseObjectSet();
+        $item1 = (object) ["foo" => "item1"];
+        $item2 = (object) ["foo" => "item2"];
+        $item3 = (object) ["foo" => "item3"];
+        $set->add($item1);
+        $set->add($item2);
+        $set->add($item3);
+        $array = $set->toArray();
+        $this->assertEquals($set->count(), count($array));
+        foreach ($array as $item) {
+            $this->assertTrue($set->contains($item));
+        }
+    }
+
+    public function testAssociatedData () {
+        $item = (object) ['foo' => 'bar'];
+        $data = "tonton";
+        $this->emptySet->add($item);
+        $this->emptySet->setData($item, $data);
+        $this->assertEquals($data, $this->emptySet->getData($item));
+    }
+
+    /**
+     * @expectedException \Digitick\Foundation\Collection\Exception\UnexpectedValueException
+     */
+    public function testAssociatedGetDataSetNonExists () {
+        $item = (object) ['foo' => 'bar'];
+        $this->emptySet->getData($item);
+    }
+
+    /**
+     * @expectedException \Digitick\Foundation\Collection\Exception\UnexpectedValueException
+     */
+    public function testAssociateSGetDataSetNonExists () {
+        $item = (object) ['foo' => 'bar'];
+        $this->emptySet->setData($item, "tonton");
+    }
+
     public function testContainsAll()
     {
 
@@ -51,7 +117,6 @@ class BaseScalarSetTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($this->set->isEmpty());
         $this->set->clear();
         $this->assertTrue($this->set->isEmpty());
-
     }
 
     public function testSize()
@@ -61,7 +126,7 @@ class BaseScalarSetTest extends \PHPUnit_Framework_TestCase
         list($object1, $object2) = $this->generateObjects();
         $list->add($object1);
         $list->add($object2);
-        $this->assertEquals($size, $list->size());
+        $this->assertEquals($size, $list->count());
     }
 
     protected function setUp()

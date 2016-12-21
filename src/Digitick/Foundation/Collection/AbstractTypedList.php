@@ -22,22 +22,20 @@ abstract class AbstractTypedList extends AbstractList
     public static function fromArray($array, $saves_indexes = true)
     {
         $total = count($array);
-        for ($i = 0; $i < $total; $i++) {
-            static::checkElementType($array[$i]);
+        foreach ($array as $item) {
+            static::checkElementType($item);
         }
-        $collection = new static($total);
         $parentCollection = parent::fromArray($array, $saves_indexes);
+        $collection = new static($parentCollection->count());
 
-        for ($i = 0; $i < $total; $i++) {
-            $collection[$i] = $parentCollection[$i];
+        foreach ($parentCollection as $key => $val) {
+            $collection [$key] = $val;
         }
         return $collection;
     }
 
     /**
-     * offsetSet override.
-     * @param $index
-     * @param $newval
+     * @inheritdoc
      */
     public function offsetSet($index, $newval)
     {
@@ -46,10 +44,7 @@ abstract class AbstractTypedList extends AbstractList
     }
 
     /**
-     * Find the offset matching the given element
-     *
-     * @param $element
-     * @return int
+     * @inheritdoc
      */
     public function indexOf($element)
     {
