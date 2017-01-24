@@ -22,6 +22,7 @@ abstract class AbstractTypedObjectSet extends AbstractObjectSet
     {
         $total = count($array);
         for ($i = 0; $i < $total; $i++) {
+            static::checkElementType($array[$i]);
             $this->add($array[$i]);
         }
 
@@ -29,36 +30,30 @@ abstract class AbstractTypedObjectSet extends AbstractObjectSet
     }
 
     /**
-     * Add a specific element
-     *
-     * @param $element
+     * @inheritdoc
      */
     public function add($element)
     {
         static::checkElementType($element);
-        if (!parent::contains($element) && !in_array($element, (array)$this->toArray()))
-            parent::add($element);
+        return parent::add($element);
     }
 
     /**
-     * Set data to an element of storage
-     *
-     * @param $element
+     * @inheritdoc
      */
     public function set($element, $data)
     {
         static::checkElementType($element);
-        parent::set($element, $data);
+        parent::setData($element, $data);
     }
 
     /**
-     * Check if an element exists in storage
+     * @inheritdoc
      *
-     * @param $element
-     * @return mixed
      */
     public function contains($element)
     {
+        static::checkElementType($element);
         return parent::contains($element);
     }
 }

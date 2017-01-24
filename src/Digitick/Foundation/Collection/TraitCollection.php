@@ -14,8 +14,8 @@ Trait TraitCollection
     /**
      * Return index of element in collection
      *
-     * @param $element
-     * @param $collectionObject
+     * @param mixed $element
+     * @param mixed $collectionObject
      * @return int
      */
     protected function indexOf($element, $collectionObject)

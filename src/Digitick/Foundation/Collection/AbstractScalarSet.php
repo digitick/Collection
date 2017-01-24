@@ -1,9 +1,13 @@
 <?php
 
 namespace Digitick\Foundation\Collection;
+use Digitick\Foundation\Collection\Exception\InvalidArgumentException;
+use Digitick\Foundation\Collection\Exception\NotImplementedException;
+use Digitick\Foundation\Collection\Exception\OutOfBoundException;
+use Digitick\Foundation\Collection\Exception\UnexpectedTypeException;
 
 /**
- * This class is used to create a fixed list of scalars
+ * This class is used to create a fixed set of scalars
  * Class AbstractScalarSet
  * @package Digitick\Foundation\Collection
  */
@@ -23,21 +27,25 @@ abstract class AbstractScalarSet implements InterfaceSet
      * @var \SplFixedArray
      */
     protected $storageArray;
+    /** @var int  */
+    protected $iteratorPointer = 0;
 
 
     /**
      * AbstractScalarSet constructor.
+     * The
      *
-     * @param int $size
+     * @param int $initialAllocation The size of the set.
      */
-    public function __construct($size = self::DEFAULT_SIZE)
+    public function __construct($initialAllocation = self::DEFAULT_SIZE)
     {
-        $this->storageArray = new \SplFixedArray($size);
+        $this->storageArray = new \SplFixedArray($initialAllocation);
         $this->nextAvailableOffset = 0;
     }
 
     /**
-     * clear empties current list.
+     * @inheritdoc
+     * @throws OutOfBoundException InvalidArgumentException
      */
     public function clear()
     {
@@ -50,20 +58,10 @@ abstract class AbstractScalarSet implements InterfaceSet
     }
 
     /**
-     * Return list size
+     * Remove element at the given offset
      *
-     * @return int
-     */
-    public function size()
-    {
-        return $this->storageArray->getSize();
-    }
-
-    /**
-     * Remove offset
-     *
-     * @param $offset
-     * @throws \InvalidArgumentException
+     * @param int $offset
+     * @throws OutOfBoundException InvalidArgumentException
      */
     protected function removeOffset($offset)
     {
@@ -79,41 +77,46 @@ abstract class AbstractScalarSet implements InterfaceSet
      */
     protected function shift($fromOffset)
     {
+        if ($fromOffset < 0) {
+            throw new InvalidArgumentException("Offset must be >= 0 ($fromOffset given)");
+        }
         if ($fromOffset > $this->nextAvailableOffset)
-            throw new \InvalidArgumentException('Cannot decrease current set with value (=' . $fromOffset . ') greater than its size (=' . $this->nextAvailableOffset . ')');
+            throw new OutOfBoundException(OutOfBoundException::buildMessage($fromOffset, 0, $this->nextAvailableOffset));
         for ($i = $fromOffset; $i < $this->nextAvailableOffset; $i++) {
             $this->storageArray->offsetSet($i, $this->get($i + 1));
         }
     }
 
     /**
-     * Get element from offset
-     *
-     * @param $offset
-     * @return mixed
+     * @inheritdoc
      */
-    public function get($offset)
+    protected function get($offset)
     {
-        return $this->storageArray->offsetGet($offset);
+        try {
+            return $this->storageArray->offsetGet($offset);
+        } catch (\RuntimeException $exc) {
+            throw new OutOfBoundException(OutOfBoundException::buildMessage($offset, 0, $this->storageArray->count()), 0, $exc);
+        }
     }
 
     /**
      * Decrease list size
      *
      * @param int $quantity
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     protected function decreaseSize($quantity = 1)
     {
+        if ($quantity < 0) {
+            throw new InvalidArgumentException("Quantity must be >= 0 ($quantity given)");
+        }
         if ($quantity > $this->nextAvailableOffset)
-            throw new \InvalidArgumentException('Cannot decrease current set with value (=' . $quantity . ') greater than its size (=' . $this->nextAvailableOffset . ')');
-        $this->nextAvailableOffset = $this->nextAvailableOffset - $quantity;
+            throw new InvalidArgumentException('Cannot decrease current set with value (=' . $quantity . ') greater than its size (=' . $this->nextAvailableOffset . ')');
+        $this->nextAvailableOffset -= $quantity;
     }
 
     /**
-     * fromArray override.
-     *
-     * @param InterfaceCollection $elementCollection
+     * @inheritdoc
      */
     public function addAll(InterfaceCollection $elementCollection)
     {
@@ -123,21 +126,28 @@ abstract class AbstractScalarSet implements InterfaceSet
     }
 
     /**
-     * Add an element to list
-     *
-     * @param $element
-     * @return bool
+     * @inheritdoc
      */
     public function add($element)
     {
-        if (is_scalar($element) && !$this->contains($element)) {
+        if (!is_scalar($element)) {
+            throw new UnexpectedTypeException(gettype($element), 'scalar');
+        }
+
+        if (!$this->contains($element)) {
             $this->storageArray->offsetSet($this->nextAvailableOffset, $element);
             $this->increaseSize();
             return true;
-        } else
-            return false;
+        }
+
+        return false;
     }
 
+    /**
+     * Return index of the element.
+     * @param mixed $element
+     * @return int
+     */
     protected function indexOf($element)
     {
         return $this->traitIndexOf($element, $this->storageArray);
@@ -150,6 +160,10 @@ abstract class AbstractScalarSet implements InterfaceSet
      */
     protected function increaseSize($quantity = 1)
     {
+        if ($quantity < 0) {
+            throw new InvalidArgumentException("Quantity must be >= 0 ($quantity given)");
+        }
+
         $this->nextAvailableOffset = $this->nextAvailableOffset + $quantity;
         $currentSize = $this->storageArray->getSize();
         if ($this->nextAvailableOffset >= $currentSize) {
@@ -158,10 +172,7 @@ abstract class AbstractScalarSet implements InterfaceSet
     }
 
     /**
-     * Check element existence in list
-     *
-     * @param $element
-     * @return bool
+     * @inheritdoc
      */
     public function contains($element)
     {
@@ -169,19 +180,15 @@ abstract class AbstractScalarSet implements InterfaceSet
     }
 
     /**
-     * Check if list is empty
-     *
-     * @return bool
+     * @inheritdoc
      */
     public function isEmpty()
     {
-        return ($this->nextAvailableOffset === 0);
+        return ($this->count() === 0);
     }
 
     /**
-     * Transform list to array
-     *
-     * @return array
+     * @inheritdoc
      */
     public function toArray()
     {
@@ -195,10 +202,7 @@ abstract class AbstractScalarSet implements InterfaceSet
     }
 
     /**
-     * Check whether every element in the given elementCollection is on the list.
-     *
-     * @param InterfaceCollection $elementCollection
-     * @return bool|int
+     * @inheritdoc
      */
     public function containsAll(InterfaceCollection $elementCollection)
     {
@@ -214,23 +218,17 @@ abstract class AbstractScalarSet implements InterfaceSet
     }
 
     /**
-     * Remove elements from a list
-     *
-     * @param InterfaceCollection $elementCollection
+     * @inheritdoc
      */
     public function removeAll(InterfaceCollection $elementCollection)
     {
         foreach ($elementCollection as $element) {
             $this->remove($element);
         }
-
     }
 
     /**
-     * Remove element from list
-     *
-     * @param $element
-     * @return bool
+     * @inheritdoc
      */
     public function remove($element)
     {
@@ -243,58 +241,50 @@ abstract class AbstractScalarSet implements InterfaceSet
     }
 
     /**
-     * Overload Spl current()
-     *
-     * @return mixed
+     * @inheritdoc
      */
     public function current()
     {
-        return $this->storageArray->current();
+        return $this->storageArray[$this->iteratorPointer];
     }
 
     /**
-     * Overload Spl key()
-     *
-     * @return mixed
+     * @inheritdoc
      */
     public function key()
     {
-        return $this->storageArray->key();
+        return $this->iteratorPointer;
     }
 
     /**
-     * Overload Spl next()
+     * @inheritdoc
      */
     public function next()
     {
-        $this->storageArray->next();
+        $this->iteratorPointer++;
     }
 
     /**
-     * Overload Spl rewind()
+     * @inheritdoc
      */
     public function rewind()
     {
-        $this->storageArray->rewind();
+        $this->iteratorPointer = 0;
     }
 
     /**
-     * Overload Spl valid()
-     *
-     * @return mixed
+     * @inheritdoc
      */
     public function valid()
     {
-        return $this->storageArray->valid();
+        return $this->iteratorPointer < $this->nextAvailableOffset;
     }
 
     /**
-     * Overload Spl count()
-     *
-     * @return mixed
+     * @inheritdoc
      */
     public function count()
     {
-        return $this->storageArray->count();
+        return $this->nextAvailableOffset;
     }
 }

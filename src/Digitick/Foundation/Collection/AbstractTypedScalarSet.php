@@ -2,6 +2,8 @@
 
 namespace Digitick\Foundation\Collection;
 
+use Digitick\Foundation\Collection\Exception\UnexpectedTypeException;
+
 /**
  * This class is used to create a fixed list of scalars
  * Class AbstractTypedScalarSet
@@ -12,14 +14,15 @@ abstract class AbstractTypedScalarSet extends AbstractScalarSet
     use TraitTypedCollection;
 
     /**
-     * fromArray override
+     * Build set from array
      *
-     * @param $array
+     * @param array $array
      * @param bool $saves_indexes
      * @return static
-     * @throws \InvalidArgumentException
+     * @throws UnexpectedTypeException
+     * TODO : un appel est fait à parent::fromArray($array, $saves_indexes); Or cette methode n'existe pas dans AbstractScalarSet. A remplacer par SplFixedArray::fromArray (a cause de $this->storageArray). Un cpoier/coller de AbstractTypedList ?
      */
-    public static function fromArray($array, $saves_indexes = true)
+    public static function fromArray(array $array, $saves_indexes = true)
     {
         $total = count($array);
         for ($i = 0; $i < $total; $i++) {
@@ -35,10 +38,7 @@ abstract class AbstractTypedScalarSet extends AbstractScalarSet
     }
 
     /**
-     * Find the offset matching the given element
-     *
-     * @param $element
-     * @return int
+     * @inheritdoc
      */
     public function indexOf($element)
     {
@@ -47,10 +47,7 @@ abstract class AbstractTypedScalarSet extends AbstractScalarSet
     }
     
     /**
-     * Add an element to list
-     *
-     * @param $element
-     * @return bool
+     * @inheritdoc
      */
     public function add($element)
     {

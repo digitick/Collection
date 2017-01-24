@@ -4,10 +4,17 @@ namespace Digitick\Tests\Foundation\Collection;
 
 use Digitick\Foundation\Collection\BaseScalarSet;
 
+/*
+ *
+ */
+
 class BaseScalarSetTest extends \PHPUnit_Framework_TestCase
 {
-    protected $set;
+    /** @var  BaseScalarSet */
     protected $emptySet;
+    /** @var  BaseScalarSet */
+    protected $set;
+    const SET_SIZE = 5;
 
     public function testListMustNotBeEmptyAfterAdd()
     {
@@ -49,20 +56,54 @@ class BaseScalarSetTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($this->set->isEmpty());
         $this->set->clear();
         $this->assertTrue($this->set->isEmpty());
-
+        $this->assertEquals(0, $this->set->count());
     }
 
     public function testSize()
     {
-        $size = 5;
-        $list = new BaseScalarSet($size);
-        $this->assertEquals($size, $list->size());
+        $this->assertEquals(self::SET_SIZE, $this->set->count());
     }
+
+    public function testRemove () {
+        $this->emptySet->add ("tonton");
+        $this->assertTrue($this->emptySet->contains("tonton"));
+        $this->assertTrue($this->emptySet->remove("tonton"));
+        $this->assertFalse($this->emptySet->contains("tonton"));
+    }
+
+    public function testRemoveNonExists() {
+        $this->assertFalse($this->emptySet->remove("tonton"));
+    }
+
+    public function testToArray () {
+        $array = $this->set->toArray();
+        foreach ($array as $item) {
+            $this->assertTrue($this->set->contains($item));
+        }
+    }
+
+    /**
+     * @expectedException \Digitick\Foundation\Collection\Exception\UnexpectedTypeException
+     */
+    public function testAddNonScalar () {
+        $this->emptySet->add(new BaseScalarSet());
+    }
+
+    public function testAddNonExists () {
+        $this->assertTrue($this->emptySet->add("tonton"));
+    }
+
+    public function testAddExists () {
+        $this->emptySet->add("tonton");
+        $this->assertFalse($this->emptySet->add("tonton"));
+    }
+
+
 
     protected function setUp()
     {
-        $this->set = $this->generateList(5);
-        $this->emptySet = new BaseScalarSet(5);
+        $this->set = $this->generateList(self::SET_SIZE);
+        $this->emptySet = new BaseScalarSet(self::SET_SIZE);
     }
 
     protected function generateList($size)

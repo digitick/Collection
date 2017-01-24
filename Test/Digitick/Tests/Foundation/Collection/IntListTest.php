@@ -6,13 +6,97 @@ use Digitick\Foundation\Collection\IntList;
 
 class IntListTest extends \PHPUnit_Framework_TestCase
 {
-    protected $list;
+    /** @var  IntList */
     protected $emptyList;
+    /** @var  IntList */
+    protected $list;
 
-    public function testAdd()
-    {
+    // Add
+    public function testAddInt() {
         $this->emptyList->add(1, 10);
-        $this->assertFalse($this->emptyList->isEmpty());
+        $this->assertEquals(10, $this->emptyList->get(1));
+    }
+
+    /**
+     * @expectedException \Digitick\Foundation\Collection\Exception\UnexpectedTypeException
+     */
+    public function testAddNonInt () {
+        $list = new IntList (10);
+        $list->add(1, "String");
+    }
+
+    public function testSetInt () {
+        $this->emptyList->set(1, 10);
+        $this->assertEquals(10, $this->emptyList->get(1));
+    }
+
+    /**
+     * @expectedException \Digitick\Foundation\Collection\Exception\UnexpectedTypeException
+     */
+    public function testSetNonInt () {
+        $this->emptyList->set(1, "String");
+    }
+
+    public function testSetIntArrayMode () {
+        $this->emptyList [1] = 10;
+        $this->assertEquals(10, $this->emptyList [1]);
+    }
+
+    /**
+     * @expectedException \Digitick\Foundation\Collection\Exception\UnexpectedTypeException
+     */
+    public function testSetNonIntArrayMode () {
+        $this->emptyList [1] = "String";
+    }
+
+    public function testIndexOf () {
+        $this->emptyList [2] = 3;
+        $this->emptyList [1] = 4;
+
+        $this->assertEquals(2, $this->emptyList->indexOf(3));
+        $this->assertEquals(1, $this->emptyList->indexOf(4));
+    }
+
+    /**
+     * @expectedException \Digitick\Foundation\Collection\Exception\UnexpectedTypeException
+     */
+    public function testIndexOfNonInt () {
+        $this->emptyList->indexOf("String");
+    }
+
+    public function testFromArraySaveIndexes () {
+        $array = [
+            1 => 5,
+            2 => 4,
+            3 => 3,
+            4 => 2,
+            5 => 1
+        ];
+
+        $list = IntList::fromArray($array, true);
+
+        $this->assertEquals(6, $list->count());
+        foreach ($array as $key => $val) {
+            $this->assertEquals($val, $list [$key]);
+        }
+    }
+
+    public function testFromArrayDontSaveIndexes () {
+        $array = [
+            1 => 5,
+            2 => 4,
+            3 => 3,
+            4 => 2,
+            5 => 1
+        ];
+
+        $list = IntList::fromArray($array, false);
+
+        $this->assertEquals(5, $list->count());
+
+        foreach ($array as $key => $val) {
+            $this->assertEquals($val, $list [$key-1]);
+        }
     }
 
     public function testContainsAll()

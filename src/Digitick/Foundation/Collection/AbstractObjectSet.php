@@ -2,8 +2,12 @@
 
 namespace Digitick\Foundation\Collection;
 
+use Digitick\Foundation\Collection\Exception\NotImplementedException;
+use Digitick\Foundation\Collection\Exception\UnexpectedTypeException;
+use Digitick\Foundation\Collection\Exception\UnexpectedValueException;
+
 /**
- * This class is used to create a fixed list of objects
+ * This class is used to create a fixed set of objects
  *
  * Class AbstractObjectSet
  * @package Digitick\Foundation\Collection
@@ -30,17 +34,17 @@ abstract class AbstractObjectSet implements InterfaceSet
     }
 
     /**
-     * clear empties current list.
+     * @inheritdoc
      */
     public function clear()
     {
         $this->storageArray->removeAll($this->storageArray);
+        return true;
     }
 
     /**
-     * Add all elements that are not already in the collection
-     *
-     * @param InterfaceCollection $elementCollection
+     * @inheritdoc
+     * @throws UnexpectedTypeException
      */
     public function addAll(InterfaceCollection $elementCollection)
     {
@@ -50,20 +54,25 @@ abstract class AbstractObjectSet implements InterfaceSet
     }
 
     /**
-     * Add a specific element
-     *
-     * @param $element
+     * @inheritdoc
+     * @throws UnexpectedTypeException
      */
     public function add($element)
     {
-        if(is_object($element))
+        if(!is_object($element)) {
+            throw new UnexpectedTypeException(gettype($element), 'object');
+        }
+
+        if (!$this->contains($element)) {
             $this->storageArray->attach($element);
+            return true;
+        }
+        return false;
+
     }
 
     /**
-     * Remove the given element
-     *
-     * @param $element
+     * @inheritdoc
      */
     public function remove($element)
     {
@@ -71,9 +80,7 @@ abstract class AbstractObjectSet implements InterfaceSet
     }
 
     /**
-     * Test if the storage is empty
-     *
-     * @return bool
+     * @inheritdoc
      */
     public function isEmpty()
     {
@@ -81,19 +88,7 @@ abstract class AbstractObjectSet implements InterfaceSet
     }
 
     /**
-     * Get the current size of storage
-     *
-     * @return mixed
-     */
-    public function size()
-    {
-        return $this->storageArray->count();
-    }
-
-    /**
-     * Transform storage in array of objects
-     *
-     * @return array
+     * @inheritdoc
      */
     public function toArray()
     {
@@ -107,10 +102,7 @@ abstract class AbstractObjectSet implements InterfaceSet
     }
 
     /**
-     * Test if a collection exists in storage
-     *
-     * @param InterfaceCollection $elementCollection
-     * @return bool
+     * @inheritdoc
      */
     public function containsAll(InterfaceCollection $elementCollection)
     {
@@ -124,10 +116,7 @@ abstract class AbstractObjectSet implements InterfaceSet
     }
 
     /**
-     * Check if an element exists in storage
-     *
-     * @param $element
-     * @return mixed
+     * @inheritdoc
      */
     public function contains($element)
     {
@@ -135,19 +124,17 @@ abstract class AbstractObjectSet implements InterfaceSet
     }
 
     /**
-     * Remove all elements in storage from given list
-     *
-     * @param InterfaceCollection $elementCollection
+     * @inheritdoc
      */
     public function removeAll(InterfaceCollection $elementCollection)
     {
-        $this->storageArray->removeAll($elementCollection);
+        foreach ($elementCollection as $item) {
+            $this->storageArray->detach($item);
+        }
     }
 
     /**
-     * Get the current object
-     *
-     * @return mixed
+     * @inheritdoc
      */
     public function current()
     {
@@ -155,9 +142,7 @@ abstract class AbstractObjectSet implements InterfaceSet
     }
 
     /**
-     * Get the current key value
-     *
-     * @return mixed
+     * @inheritdoc
      */
     public function key()
     {
@@ -165,7 +150,7 @@ abstract class AbstractObjectSet implements InterfaceSet
     }
 
     /**
-     * Makes the pointer move forward in storage
+     * @inheritdoc
      */
     public function next()
     {
@@ -173,7 +158,7 @@ abstract class AbstractObjectSet implements InterfaceSet
     }
 
     /**
-     * Make the pointer go back to first element
+     * @inheritdoc
      */
     public function rewind()
     {
@@ -181,9 +166,7 @@ abstract class AbstractObjectSet implements InterfaceSet
     }
 
     /**
-     * Test if the storage is valid
-     *
-     * @return mixed
+     * @inheritdoc
      */
     public function valid()
     {
@@ -191,9 +174,7 @@ abstract class AbstractObjectSet implements InterfaceSet
     }
 
     /**
-     * Get the number of elements (SplObjectStorage count() overload)
-     *
-     * @return mixed
+     * @inheritdoc
      */
     public function count()
     {
@@ -201,23 +182,30 @@ abstract class AbstractObjectSet implements InterfaceSet
     }
 
     /**
-     * Get an element from storage
-     *
-     * @param $object
+     * Return data associated to the given element.
+     * @param object $element
      * @return mixed
      */
-    public function get($object)
+    public function getData($element)
     {
-        return $this->storageArray->offsetGet($object);
+        try {
+            return $this->storageArray->offsetGet($element);
+        } catch (\UnexpectedValueException $exc) {
+            throw new UnexpectedValueException("Unable to get data. Element not found in the set.", $exc->getCode(), $exc);
+        }
     }
 
     /**
-     * Set data to an element of storage
+     * Set data to
      *
-     * @param $element
+     * @param object $element
+     * @param mixed $data
      */
-    public function set($element, $data)
+    public function setData ($element, $data)
     {
+        if (!$this->contains($element)) {
+            throw new UnexpectedValueException("Unable to set data. Element not found in the set.");
+        }
         $this->storageArray->offsetSet($element, $data);
     }
 }
