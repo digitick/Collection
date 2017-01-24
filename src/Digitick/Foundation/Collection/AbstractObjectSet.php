@@ -125,12 +125,12 @@ abstract class AbstractObjectSet implements InterfaceSet
 
     /**
      * @inheritdoc
-     * TODO : Probleme SplObjectStorage::removeAll demande un SplObjectStorage mais on y passe un InterfaceCollection ce qui n'est rien pour lui.
      */
     public function removeAll(InterfaceCollection $elementCollection)
     {
-        throw new NotImplementedException();
-        $this->storageArray->removeAll($elementCollection);
+        foreach ($elementCollection as $item) {
+            $this->storageArray->detach($item);
+        }
     }
 
     /**

@@ -222,11 +222,9 @@ abstract class AbstractScalarSet implements InterfaceSet
      */
     public function removeAll(InterfaceCollection $elementCollection)
     {
-        throw new NotImplementedException();
         foreach ($elementCollection as $element) {
             $this->remove($element);
         }
-
     }
 
     /**

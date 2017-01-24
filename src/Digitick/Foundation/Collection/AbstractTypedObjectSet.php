@@ -17,17 +17,17 @@ abstract class AbstractTypedObjectSet extends AbstractObjectSet
      * @param $array
      * @return \SplObjectStorage
      * @throws \InvalidArgumentException
-     * TODO : methode non finie ? Return SplObjectStorage ?
      */
-//    public function fromArray($array)
-//    {
-//        $total = count($array);
-//        for ($i = 0; $i < $total; $i++) {
-//            $this->add($array[$i]);
-//        }
-//
-//        return $this->storageArray;
-//    }
+    public function fromArray($array)
+    {
+        $total = count($array);
+        for ($i = 0; $i < $total; $i++) {
+            static::checkElementType($array[$i]);
+            $this->add($array[$i]);
+        }
+
+        return $this->storageArray;
+    }
 
     /**
      * @inheritdoc
