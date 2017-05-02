@@ -1,5 +1,5 @@
 {
-  "name": "Digitick/Collection",
+  "name": "digitick/collection",
   "description": "Collection tools for developpers",
   "minimum-stability": "dev",
   "license": "Apache 2",
@@ -7,6 +7,10 @@
     {
       "name": "Nicolas Natalini",
       "email": "nicolas.natalini@digitick.com"
+    },
+    {
+      "name": "Alexandre Del Vecchio",
+      "email": "alexandre.del-vecchio@digitick.com"
     }
   ],
   "autoload": {
