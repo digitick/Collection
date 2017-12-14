@@ -2,6 +2,7 @@
   "name": "digitick/collection",
   "description": "Collection tools for developpers",
   "minimum-stability": "dev",
+  "prefer-stable": true,
   "license": "Apache 2",
   "authors": [
     {
@@ -14,7 +15,7 @@
     }
   ],
   "autoload": {
-    "psr-4" : { "": "src/" }
+    "psr-4" : { "Digitick\\Foundation\\Collection\\": "src/Digitick/Foundation/Collection" }
   },
   "require" : {
     "php": ">=5.4"
