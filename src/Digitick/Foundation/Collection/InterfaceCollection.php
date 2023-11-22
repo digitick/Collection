@@ -6,7 +6,7 @@ namespace Digitick\Foundation\Collection;
  * Interface InterfaceCollection
  * @package Digitick\Foundation\Collection
  */
-interface InterfaceCollection extends \Iterator, \Countable
+interface InterfaceCollection extends \IteratorAggregate, \Countable
 {
 
     /**

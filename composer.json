@@ -18,9 +18,9 @@
     "psr-4" : { "Digitick\\Foundation\\Collection\\": "src/Digitick/Foundation/Collection" }
   },
   "require" : {
-    "php": ">=5.4"
+    "php": "^8.0"
   },
   "require-dev": {
-    "phpunit/phpunit": "4.8.24"
+	"phpunit/phpunit": "^9.0||^10.0"
   }
 }
